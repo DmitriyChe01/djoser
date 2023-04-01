@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.timezone import now
@@ -50,9 +52,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def permission_denied(self, request, **kwargs):
         if (
-            settings.HIDE_USERS
-            and request.user.is_authenticated
-            and self.action in ["update", "partial_update", "list", "retrieve"]
+                settings.HIDE_USERS
+                and request.user.is_authenticated
+                and self.action in ["update", "partial_update", "list", "retrieve"]
         ):
             raise NotFound()
         super().permission_denied(request, **kwargs)
@@ -86,7 +88,7 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == "reset_username_confirm":
             self.permission_classes = settings.PERMISSIONS.username_reset_confirm
         elif self.action == "destroy" or (
-            self.action == "me" and self.request and self.request.method == "DELETE"
+                self.action == "me" and self.request and self.request.method == "DELETE"
         ):
             self.permission_classes = settings.PERMISSIONS.user_delete
         return super().get_permissions()
@@ -97,7 +99,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 return settings.SERIALIZERS.user_create_password_retype
             return settings.SERIALIZERS.user_create
         elif self.action == "destroy" or (
-            self.action == "me" and self.request and self.request.method == "DELETE"
+                self.action == "me" and self.request and self.request.method == "DELETE"
         ):
             return settings.SERIALIZERS.user_delete
         elif self.action == "activation":
@@ -138,7 +140,7 @@ class UserViewSet(viewsets.ModelViewSet):
             sender=self.__class__, user=user, request=self.request
         )
 
-        context = {"user": user}
+        context = {"user": user, "password": serializer.validated_data['password']}
         to = [get_user_email(user)]
         if settings.SEND_ACTIVATION_EMAIL:
             settings.EMAIL.activation(self.request, context).send(to)

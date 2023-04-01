@@ -9,6 +9,7 @@ from rest_framework.settings import api_settings
 from djoser import utils
 from djoser.compat import get_user_email, get_user_email_field_name
 from djoser.conf import settings
+from djoser.utils import generate_password
 
 User = get_user_model()
 
@@ -53,7 +54,7 @@ class UserCreateMixin:
 
 
 class UserCreateSerializer(UserCreateMixin, serializers.ModelSerializer):
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    password = serializers.HiddenField(write_only=True, default=generate_password())
 
     default_error_messages = {
         "cannot_create_user": settings.CONSTANTS.messages.CANNOT_CREATE_USER_ERROR
@@ -143,8 +144,8 @@ class UserFunctionsMixin:
         except User.DoesNotExist:
             pass
         if (
-            settings.PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND
-            or settings.USERNAME_RESET_SHOW_EMAIL_NOT_FOUND
+                settings.PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND
+                or settings.USERNAME_RESET_SHOW_EMAIL_NOT_FOUND
         ):
             self.fail("email_not_found")
 

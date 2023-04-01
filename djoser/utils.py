@@ -1,8 +1,17 @@
+import random
+import string
+import itertools
+
 from django.contrib.auth import login, logout, user_logged_in, user_logged_out
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
 from djoser.conf import settings
+
+
+def generate_password():
+    allowed_chars = itertools.cycle([string.ascii_lowercase, string.ascii_uppercase, string.digits])
+    return ''.join(random.choice(allowed_chars.__next__()) for _ in range(8))
 
 
 def encode_uid(pk):
