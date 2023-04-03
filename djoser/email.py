@@ -22,6 +22,17 @@ class ActivationEmail(BaseEmailMessage):
 class ConfirmationEmail(BaseEmailMessage):
     template_name = "email/confirmation.html"
 
+    def get_context_data(self):
+        # ActivationEmail can be deleted
+        context = super().get_context_data()
+
+        user = context.get("user")
+        context["password"] = context.get("password")
+        context["refresh_jwt"] = context.get("refresh_jwt")
+        context["token"] = default_token_generator.make_token(user)
+        context["url"] = settings.ACTIVATION_URL.format(**context)
+        return context
+
 
 class PasswordResetEmail(BaseEmailMessage):
     template_name = "email/password_reset.html"

@@ -5,6 +5,7 @@ from rest_framework import generics, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from djoser import signals, utils
 from djoser.compat import get_user_email
@@ -137,8 +138,11 @@ class UserViewSet(viewsets.ModelViewSet):
         signals.user_registered.send(
             sender=self.__class__, user=user, request=self.request
         )
+        refresh: RefreshToken = RefreshToken.for_user(user)
 
-        context = {"user": user, "password": serializer.validated_data['password']}
+        context = {"user": user,
+                   "password": serializer.validated_data['password'],
+                   "access_jwt": str(refresh.access_token)}
         to = [get_user_email(user)]
         if settings.SEND_ACTIVATION_EMAIL:
             settings.EMAIL.activation(self.request, context).send(to)
